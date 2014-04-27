@@ -1,4 +1,6 @@
 from pyechonest import config
+import logging
+from logbook import Logger
 
 config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
 #config.ECHO_NEST_API_KEY=""
@@ -18,12 +20,19 @@ import random
 ##python keymix.py /path/to/mp3s djideas.txt
 ##"""
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+log = Logger('Logbook')
 
 directory = "C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs"
 
-allsongdict_mock = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
+shimsongdict_mock = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
                    "oddoneout":60}
 
+
+allsongdict = {}
+shimsongdict = {}
 
 harmonic_mixing_dict = {11:[121,11,21,10],
 21:[11,21,31,20],
@@ -52,11 +61,22 @@ harmonic_mixing_dict = {11:[121,11,21,10],
 
 
 
-def pickasong(songname):
-    return allsongdict_mock.pop(songname)
+def pickasong(songname=None):
+    log.info('picking a song from shimsongdict')
+    if songname == None:
+        key = random.choice(shimsongdict.keys())
+        log.debug("key type: {0}", type(key))
+        pickedsong = shimsongdict.pop(key)
+    else:
+        pickedsong = shimsongdict.pop(songname)
+
+    log.info('picked song: {0}', pickedsong)
+    return pickedsong
      
 
 def findkeymatches(current_song_keysig):
+    log.info("the current song's keysig, {0}, matched with these keysigs: {1} ",
+             current_song_keysig, harmonic_mixing_dict[current_song_keysig])
     return harmonic_mixing_dict[current_song_keysig]
 
 
@@ -64,16 +84,21 @@ def findkeymatches(current_song_keysig):
 def findsongmatches(current_song_matches):
     outputlist = []
     for keysig in current_song_matches:
-        for name, value in allsongdict_mock.items():
+        for name, value in shimsongdict.items():
             if keysig == value:
-                #print(name, value)
+                log.info("the song that got matched with: {0}{1} ", name,value)
                 outputlist.append(name)
 
     if outputlist.__len__() == 0:
-        print("no more songs that match, you're done.")
+        log.info("no more songs that match, you're done.")
         return "killswitch"
 
-    #print("enumrate output list:", *outputlist, sep=',')
+    #print("enumerate output list:", *outputlist, sep=',')
+    #stupid old python versions wont work w ^^
+    log.info("enumerate output list:")
+    for x in outputlist:
+        log.info(x)
+
     songname = random.choice(outputlist)
             
     return songname
@@ -93,9 +118,8 @@ def tempo(audiofile):
 
 
 def gatherfiles(directory):
-#returns a dict mocked by allsongdict_mock
-    allsongdict = {}
-    shimsongdict = {}
+#returns a dict mocked by shimsongdict_mock
+    
     ff = os.listdir(directory)
     for f in ff:
         if f.rsplit('.', 1)[1].lower() in ['mp3', 'aif', 'aiff', 'aifc', 'wav']:
@@ -107,36 +131,33 @@ def gatherfiles(directory):
 
 #sort of a shim thing to produce the format expected
             shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
-            print(int(str(keysig(filekey)) + str(mode(filekey))))
-            print(allsongdict.items())
+            log.info(int(str(keysig(filekey)) + str(mode(filekey))))
+            
 
     print >> sys.stderr, 'making recommendations.'
 
     f = open("outfile.txt", 'w')
-    #print("\n\nsong name, key, mode, and time signature \n")
-    #pprint(allsongdict)
     f.close()
-
-
-
-    
-
+    log.debug("shimsongdict: {0},{1}", shimsongdict, type(shimsongdict))
+    log.debug("shimsongdict_mock: {0},{1}", shimsongdict_mock, type(shimsongdict_mock))
     return shimsongdict
 
-
-
-
-
 def harmonicmix():
-    #call gatherfiles, i fake it using allsongdict
-    #seed it or ask for a random song. againt, i fake it.
-    seed = "Arcade"
-    print(seed)
-    songname = seed
-    
+#call gatherfiles, i fake it using allsongdict 
+# by commenting out below and setting shimsongdict = shimsongdict_mock
+
+#seed it or ask for a random song. againt, i fake it.
+##    seed = "Arcade"
+##    print(seed)
+##    songname = seed
+
+    shimsongdict = gatherfiles(directory)
+    #shimsongdict = shimsongdict_mock
 
     while 1:
-        current_song_keysig = pickasong(songname)
+        
+#pass in songname if you want to seed it 
+        current_song_keysig = pickasong()
         #print(current_song_keysig, "current_song_keysig")
         current_song_matches = findkeymatches(current_song_keysig)
         #print(current_song_matches, "current_song_matches")
@@ -148,8 +169,8 @@ def harmonicmix():
         print(songname, "<-- is the next song you'll hear")
         
 #basic tests
-#harmonicmix()
-print(gatherfiles(directory))
+harmonicmix()
+#print(gatherfiles(directory))
 
 #test that we get variety
 ##for x in range(0,10):
