@@ -1,33 +1,27 @@
 from pyechonest import config
 
-config.ECHO_NEST_API_KEY=""
+config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
+#config.ECHO_NEST_API_KEY=""
 
 import sys, os
 import echonest.remix.audio as audio
 from pprint import pprint
 from pyechonest import config
-
-
-usage = """
-Usage:
-python keymix.py <inputDirectory> <outputFilename>
-
-Example:
-python keymix.py /path/to/mp3s djideas.txt
-"""
-
 import unittest
 import random
 
+##usage = """
+##Usage:
+##python keymix.py <inputDirectory> <outputFilename>
+##
+##Example:
+##python keymix.py /path/to/mp3s djideas.txt
+##"""
 
-#fake tests
-#make 5 representations of songs
-#then ensure that functions do what they should
 
+directory = "C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs"
 
-#generate mock song representations. this will go into "setUp"
-
-allsongdict = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
+allsongdict_mock = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
                    "oddoneout":60}
 
 
@@ -59,7 +53,7 @@ harmonic_mixing_dict = {11:[121,11,21,10],
 
 
 def pickasong(songname):
-    return allsongdict.pop(songname)
+    return allsongdict_mock.pop(songname)
      
 
 def findkeymatches(current_song_keysig):
@@ -70,7 +64,7 @@ def findkeymatches(current_song_keysig):
 def findsongmatches(current_song_matches):
     outputlist = []
     for keysig in current_song_matches:
-        for name, value in allsongdict.items():
+        for name, value in allsongdict_mock.items():
             if keysig == value:
                 #print(name, value)
                 outputlist.append(name)
@@ -79,7 +73,7 @@ def findsongmatches(current_song_matches):
         print("no more songs that match, you're done.")
         return "killswitch"
 
-    print("enumrate output list:", *outputlist, sep=',')
+    #print("enumrate output list:", *outputlist, sep=',')
     songname = random.choice(outputlist)
             
     return songname
@@ -94,30 +88,41 @@ def timesig(audiofile):
 def mode(audiofile):
     return int(audiofile.analysis.mode['value'])
 
+def tempo(audiofile):
+    return int(audiofile.analysis.tempo['value'])
+
+
 def gatherfiles(directory):
-#returns a dict mocked by allsongdict
-    
+#returns a dict mocked by allsongdict_mock
+    allsongdict = {}
+    shimsongdict = {}
     ff = os.listdir(directory)
     for f in ff:
-        # collect the audio files
         if f.rsplit('.', 1)[1].lower() in ['mp3', 'aif', 'aiff', 'aifc', 'wav']:
-            # the new defer kwarg doesn't load the audio until needed
             filename = os.path.join(directory, f)
             
             filekey = audio.LocalAudioFile(filename, defer=True)
            
-            keydict[filename] = (keysig(filekey), mode(filekey),timesig(filekey))
-        # mind the rate limit
-            print(keydict.items())
+            allsongdict[filename] = [keysig(filekey), mode(filekey),timesig(filekey), tempo(filekey)]
 
-    print >> sys.stderr, 'making recommendations.',
-    for song in aud:
-        print >> sys.stderr, '.',
+#sort of a shim thing to produce the format expected
+            shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
+            print(int(str(keysig(filekey)) + str(mode(filekey))))
+            print(allsongdict.items())
 
-    f = open(outfile.txt, 'w')
-    print("\n\nsong name, key, mode, and time signature \n")
-    pprint(keydict)
+    print >> sys.stderr, 'making recommendations.'
+
+    f = open("outfile.txt", 'w')
+    #print("\n\nsong name, key, mode, and time signature \n")
+    #pprint(allsongdict)
     f.close()
+
+
+
+    
+
+    return shimsongdict
+
 
 
 
@@ -142,9 +147,9 @@ def harmonicmix():
         
         print(songname, "<-- is the next song you'll hear")
         
-    
-#test 1
+#basic tests
 #harmonicmix()
+print(gatherfiles(directory))
 
 #test that we get variety
 ##for x in range(0,10):
@@ -155,3 +160,9 @@ def harmonicmix():
 
 
 
+#tests
+##harmonicmix integration test
+##harmonicmix test that we get variety, and it's not including wrong songs
+##pickasong
+##findkeymatches
+##findsongmatches
