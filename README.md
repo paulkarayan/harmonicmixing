@@ -8,20 +8,27 @@ to do so, it discerns the keys (and bpm) of audio files in a directory using the
 this is a major wip. so it doesn't do any of this right now :)
 
 current gaps:
-- get capsule.py to create longer songs (use the examples)
 
-- get some real songs that would link together nicely and test with them
+- fake integration (e.g. return songs in format that can be typed into capsule on command line)
 
-- write a nice log / narrative for the user about why the songs were linked together
+- figure out the looping bug (e.g. I don't feed the selected song back into the top)
+
+- write a nice narrative for the user about why the songs were linked together (or not... maybethis is a log)
 
 - integrate with capsule.py
 -- may want to just link songs together for now
+-- need to deal with inability to have spaces (unless in "") and hatred for periods...
+-- may need to modify the module to:
+--- include the api key you're using somehow passed in or in a config
+--- figure out how long to make each song, default right now is 8 sec. could be random or a % of the total length, or random between 2-3 min (those that dont match will not be included... need to deal with this so we dont get gaps or bad mixes)
 
 - finish converting the prints to logbook for clarity
 -- logbook needs to be controlled
 -- clean out old logging
 
 - make mocking easier so development is faster
+-- use shimsongdict_mock 
+-- use a copy of the dict if there's one available... or check to see if it's been updated, otherwise use cached dict 
 
 - unit / integration tests
 -- harmonicmix integration test
@@ -32,3 +39,4 @@ current gaps:
 --gatherfiles
 --capsule integration test
 
+- figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory. 

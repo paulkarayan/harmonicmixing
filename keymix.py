@@ -2,7 +2,7 @@ from pyechonest import config
 import logging
 from logbook import Logger
 
-config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
+
 #config.ECHO_NEST_API_KEY=""
 
 import sys, os
@@ -70,7 +70,7 @@ def pickasong(songname=None):
     else:
         pickedsong = shimsongdict.pop(songname)
 
-    log.info('picked song: {0}', pickedsong)
+    log.info('picked song: {0} with keysig {1}', key, pickedsong)
     return pickedsong
      
 
@@ -131,7 +131,7 @@ def gatherfiles(directory):
 
 #sort of a shim thing to produce the format expected
             shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
-            log.info(int(str(keysig(filekey)) + str(mode(filekey))))
+            log.info("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
             
 
     print >> sys.stderr, 'making recommendations.'

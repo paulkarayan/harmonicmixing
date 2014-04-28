@@ -1,0 +1,24 @@
+from current test:
+
+{'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Refused - Refused Are Fucking Dead ( Bomba Je Remix ).mp3': 71, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Bj\xf6rk - Cosmogony Acapella.mp3': 110, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre - Dre Day.mp3': 71, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Karl_Blau-Gnos_Levohs.mp3': 71, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre feat. Eminem - Forgot About Dre.mp3': 81, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\L\xfanasa - The Minor Bee.mp3': 110, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\arpeg 04122014_5.mp3': 21, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\dune bassoon 03162014_8.mp3': 70, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr.Dre & Snoop Dogg- Still Dre.mp3': 51, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Joyce Sims - (You Are My) All And All.mp3': 31, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Raleigh_Moncrief-Guppies.mp3': 0, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Hiiragi_Fukuda-Open_Fields_Blues.mp3': 21, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Cannonball - The Breeders.mp3': 31, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Polish Girl - NEON INDIAN.mp3': 1, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\three berry icecream - go pit-a-pat days.mp3': 1, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Shadowfax - 13 -  Neither Here Nor There (Live 1995).mp3': 81}
+
+
+example mix:
+
+C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Dr. Dre feat. Eminem - Forgot About Dre.mp3 with keysig 81     [seed]
+the current song's keysig, 81, matched with these keysigs: [71, 81, 91, 80] 
+'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre - Dre Day.mp3':71
+
+from:
+[2014-04-27 23:59] INFO: Logbook: C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Refused - Refused Are Fucking Dead ( Bomba Je Remix ).mp3
+[2014-04-27 23:59] INFO: Logbook: C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Dr. Dre - Dre Day.mp3
+[2014-04-27 23:59] INFO: Logbook: C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Karl_Blau-Gnos_Levohs.mp3
+[2014-04-27 23:59] INFO: Logbook: C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Shadowfax - 13 -  Neither Here Nor There (Live 1995).mp3
+
+
+
+soo... a nice test would be:
+
+C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Dr. Dre feat. Eminem - Forgot About Dre.mp3
+'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre - Dre Day.mp3'
+C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs\Refused - Refused Are Fucking Dead ( Bomba Je Remix ).mp3
