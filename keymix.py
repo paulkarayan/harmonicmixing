@@ -1,8 +1,9 @@
 from pyechonest import config
 import logging
+import subprocess
 from logbook import Logger
 
-
+config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
 #config.ECHO_NEST_API_KEY=""
 
 import sys, os
@@ -33,6 +34,7 @@ shimsongdict_mock = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":
 
 allsongdict = {}
 shimsongdict = {}
+
 
 harmonic_mixing_dict = {11:[121,11,21,10],
 21:[11,21,31,20],
@@ -67,10 +69,12 @@ def pickasong(songname=None):
         key = random.choice(shimsongdict.keys())
         log.debug("key type: {0}", type(key))
         pickedsong = shimsongdict.pop(key)
+        songname = key
     else:
         pickedsong = shimsongdict.pop(songname)
+        
 
-    log.info('picked song: {0} with keysig {1}', key, pickedsong)
+    log.info('picked song: {0} with keysig {1}', songname, pickedsong)
     return pickedsong
      
 
@@ -142,7 +146,7 @@ def gatherfiles(directory):
     log.debug("shimsongdict_mock: {0},{1}", shimsongdict_mock, type(shimsongdict_mock))
     return shimsongdict
 
-def harmonicmix():
+def harmonicmix(songname=None):
 #call gatherfiles, i fake it using allsongdict 
 # by commenting out below and setting shimsongdict = shimsongdict_mock
 
@@ -150,14 +154,17 @@ def harmonicmix():
 ##    seed = "Arcade"
 ##    print(seed)
 ##    songname = seed
-
+    outputstring = "python capsule.py"
     shimsongdict = gatherfiles(directory)
     #shimsongdict = shimsongdict_mock
-
+    
+    
     while 1:
         
-#pass in songname if you want to seed it 
-        current_song_keysig = pickasong()
+#pass in songname if you want to seed it
+        outputstring += ' "' + songname + '"'
+        print(outputstring)
+        current_song_keysig = pickasong(songname)
         #print(current_song_keysig, "current_song_keysig")
         current_song_matches = findkeymatches(current_song_keysig)
         #print(current_song_matches, "current_song_matches")
@@ -167,18 +174,17 @@ def harmonicmix():
             break
         
         print(songname, "<-- is the next song you'll hear")
+        outputstring += ' "' + songname + '"'
+        print(outputstring)
+
+    return outputstring
         
 #basic tests
-harmonicmix()
-#print(gatherfiles(directory))
 
 #test that we get variety
-##for x in range(0,10):
-##    print(x, "\n")
-##    harmonicmix()
-##    allsongdict = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
-##                   "oddoneout":60}
-
+for x in range(0,2):
+    print(x, "\n")
+    harmonicmix('C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre - Dre Day.mp3')
 
 
 #tests

@@ -30,6 +30,9 @@ current gaps:
 -- use shimsongdict_mock 
 -- use a copy of the dict if there's one available... or check to see if it's been updated, otherwise use cached dict 
 
+- bug: keysigs of 0 and 1. wtf?
+{'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre - Dre Day.mp3': 71, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre feat. Eminem - Forgot About Dre.mp3': 81, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\L\xfanasa - The Minor Bee.mp3': 110, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\dune bassoon 03162014_8.mp3': 70, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr.Dre & Snoop Dogg- Still Dre.mp3': 51, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Joyce Sims - (You Are My) All And All.mp3': 31, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Hiiragi_Fukuda-Open_Fields_Blues.mp3': 21, 'C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Polish Girl - NEON INDIAN.mp3': 1},<type 'dict'>
+
 - unit / integration tests
 -- harmonicmix integration test
 --harmonicmix test that we get variety, and it's not including wrong songs
@@ -39,4 +42,6 @@ current gaps:
 --gatherfiles
 --capsule integration test
 
-- figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory. 
+- improve on the output
+-- cycle back through to try another mix if you only get 1-2 songs
+-- figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory. 
