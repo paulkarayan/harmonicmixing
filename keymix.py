@@ -2,8 +2,10 @@ from pyechonest import config
 import logging
 import subprocess
 from logbook import Logger
+import soundcloud
 
 config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
+
 #config.ECHO_NEST_API_KEY=""
 
 import sys, os
@@ -26,7 +28,16 @@ logger = logging.getLogger(__name__)
 
 log = Logger('Logbook')
 
+
+# PC directory ... just uncomment to test
 directory = "C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs"
+capdir = "C:\Users\paulkarayan\Documents\GitHub\harmonicmixing"
+
+#Linux directory -for songs
+#directory = "/home/paulkarayan/harmonicmixing/songs/"
+
+#linux directory for the capsule script
+#capdir = "/home/paulkarayan/harmonicmixing/"
 
 shimsongdict_mock = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
                    "oddoneout":60}
@@ -72,11 +83,11 @@ def pickasong(songname=None):
         songname = key
     else:
         pickedsong = shimsongdict.pop(songname)
-        
+
 
     log.info('picked song: {0} with keysig {1}', songname, pickedsong)
     return pickedsong
-     
+
 
 def findkeymatches(current_song_keysig):
     log.info("the current song's keysig, {0}, matched with these keysigs: {1} ",
@@ -104,7 +115,7 @@ def findsongmatches(current_song_matches):
         log.info(x)
 
     songname = random.choice(outputlist)
-            
+
     return songname
 
 
@@ -123,20 +134,20 @@ def tempo(audiofile):
 
 def gatherfiles(directory):
 #returns a dict mocked by shimsongdict_mock
-    
+
     ff = os.listdir(directory)
     for f in ff:
         if f.rsplit('.', 1)[1].lower() in ['mp3', 'aif', 'aiff', 'aifc', 'wav']:
             filename = os.path.join(directory, f)
-            
+
             filekey = audio.LocalAudioFile(filename, defer=True)
-           
+
             allsongdict[filename] = [keysig(filekey), mode(filekey),timesig(filekey), tempo(filekey)]
 
 #sort of a shim thing to produce the format expected
             shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
             log.info("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
-            
+
 
     print >> sys.stderr, 'making recommendations.'
 
@@ -147,20 +158,22 @@ def gatherfiles(directory):
     return shimsongdict
 
 def harmonicmix(songname=None):
-#call gatherfiles, i fake it using allsongdict 
+#call gatherfiles, i fake it using allsongdict
 # by commenting out below and setting shimsongdict = shimsongdict_mock
 
 #seed it or ask for a random song. againt, i fake it.
 ##    seed = "Arcade"
 ##    print(seed)
 ##    songname = seed
-    outputstring = "python capsule.py"
+
+#note that you need to change this for Linux...
+    outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 20 -e ")
     shimsongdict = gatherfiles(directory)
     #shimsongdict = shimsongdict_mock
-    
-    
+
+
     while 1:
-        
+
 #pass in songname if you want to seed it
         outputstring += ' "' + songname + '"'
         print(outputstring)
@@ -172,20 +185,40 @@ def harmonicmix(songname=None):
 
         if songname == "killswitch":
             break
-        
+
         print(songname, "<-- is the next song you'll hear")
         outputstring += ' "' + songname + '"'
         print(outputstring)
 
+    process = subprocess.Popen(outputstring, stdout=subprocess.PIPE, shell=True)
+    stdoutdata, stderrdata = process.communicate()
+    print(process.returncode, "return code")
+
     return outputstring
-        
+
 #basic tests
 
 #test that we get variety
-for x in range(0,2):
-    print(x, "\n")
-    harmonicmix('C:\\Users\\paulkarayan\\Documents\\GitHub\\harmonicmixing\\songs\\Dr. Dre - Dre Day.mp3')
+##for x in range(0,2):
+##    print(x, "\n")
+##    harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
+##
 
+#auth for soundcloud...
+
+# create a client object with access token
+##client = soundcloud.Client(access_token='')
+
+harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
+
+### upload audio file
+##track = client.post('/tracks', track={
+##    'title': 'Harmonic Mixify - a mix for you',
+##    'asset_data': open('capsule.mp3', 'rb')
+##})
+##
+### print track link
+##print(track.permalink_url)
 
 #tests
 ##harmonicmix integration test
