@@ -6,14 +6,14 @@ uses the concept of "harmonic mixing" (google it!) to create a delightful mix fr
 to do so, the program discerns the keys (and bpm) of audio files in a directory using the echnoest API, and then links songs that will sound good together.
 
 Instructions:
-1) clone this repo
-2) install the Echo Nest API key per the directions on Remix
-if you're using linux, you probably need to test Capsule.py because ffmpeg is flaky. 
-3) add your Echo Nest API key to the script
-4) add your files to the Songs directory, or update the directory locations in the script
-5) run:
+- clone this repo
+- install the Echo Nest API key per the directions on Remix
+--if you're using linux, you probably need to test Capsule.py because ffmpeg is flaky. 
+- add your Echo Nest API key to the script
+- add your files to the Songs directory, or update the directory locations in the script
+- run:
 > python harmonicmix.py
-
+- commit to this project since it could be dope
 
 this is a major wip. so it doesn't do any of this right now :)
 
