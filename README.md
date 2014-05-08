@@ -8,7 +8,7 @@ to do so, the program discerns the keys (and bpm) of audio files in a directory 
 Instructions:
 - clone this repo
 - install the Echo Nest API key per the directions on Remix
---if you're using linux, you probably need to test Capsule.py because ffmpeg is flaky. 
+(if you're using linux, you probably need to test Capsule.py because ffmpeg is flaky.) 
 - add your Echo Nest API key to the script
 - add your files to the Songs directory, or update the directory locations in the script
 - run:
@@ -28,7 +28,7 @@ current gaps:
 - change the output file name to something better than capsule.py
 
 - improve on the output
--- cycle back through to try another mix if you only get 1-2 songs
+   - cycle back through to try another mix if you only get 1-2 songs
 -- figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory
 -- tempo or beat matching 
    see: http://www.surina.net/soundtouch/
