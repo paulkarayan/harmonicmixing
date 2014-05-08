@@ -28,6 +28,7 @@ current gaps:
 - change the output file name to something better than capsule.py
 
 - improve on the output
+   - allow a user to explicitly seed a song, length of mix, feel of music, etc...
    - cycle back through to try another mix if you only get 1-2 songs
    - figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory
    - tempo or beat matching (see: http://www.surina.net/soundtouch/)
