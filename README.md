@@ -1,15 +1,38 @@
 harmonicmixing
 ==============
 
-uses the concept of "harmonic mixing" (google it!) to create a delightful mix (and upload it to soundcloud) from your music collection.
+uses the concept of "harmonic mixing" (google it!) to create a delightful mix from your music collection.
 
-to do so, it discerns the keys (and bpm) of audio files in a directory using the echnoest API. you'll need to install the Echo Nest API key per the directions on Remix, and add your key to the script.
+to do so, the program discerns the keys (and bpm) of audio files in a directory using the echnoest API, and then links songs that will sound good together.
+
+Instructions:
+1) clone this repo
+2) install the Echo Nest API key per the directions on Remix
+if you're using linux, you probably need to test Capsule.py because ffmpeg is flaky. 
+3) add your Echo Nest API key to the script
+4) add your files to the Songs directory, or update the directory locations in the script
+5) run:
+> python harmonicmix.py
+
 
 this is a major wip. so it doesn't do any of this right now :)
 
 current gaps:
 
+- move API keys and directory locations to a Config file (vs. in code)
 
+- clean out old comments
+
+- move these to-dos to the issue tracker in Github
+
+- change the output file name to something better than capsule.py
+
+- improve on the output
+-- cycle back through to try another mix if you only get 1-2 songs
+-- figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory
+-- tempo or beat matching 
+   see: http://www.surina.net/soundtouch/
+-- only link files that have a certain mood together. for example, don't mix metal and rap.
 
 - write a nice narrative for the user about why the songs were linked together (or not... maybethis is a log)
 
@@ -39,18 +62,14 @@ current gaps:
 --gatherfiles
 --capsule integration test
 
-- improve on the output
--- cycle back through to try another mix if you only get 1-2 songs
--- figure out how to match so we get the longest possible mix (that's still delightful) from the songs in the directory
--- tempo or beat matching 
-   see: http://www.surina.net/soundtouch/
 
 - normalize the file structure
 -- don't use an absolute directory
 -- allow songs to be located somewhere else (parameterize?)
 
+
 - allow user to limit number of songs we attempt to use. esp. important if we're going to scan them all... or perhaps you go until you hit an api rate limit?
 
-- upload to Soundcloud completed (again - what do we do to manage API keys)
+- upload a completed mix to Soundcloud 
 
-- logging added to subprocess entry / exit, upload etc...
+- logging added to subprocess entry / exit, upload etc... right now you just wait
