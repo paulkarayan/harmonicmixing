@@ -4,7 +4,6 @@ import subprocess
 from logbook import Logger
 import soundcloud
 
-config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
 
 #config.ECHO_NEST_API_KEY=""
 
