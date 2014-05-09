@@ -15,4 +15,4 @@ Instructions:
 > python harmonicmix.py
 - commit to this project since it could be dope
 
-this is a major wip. so it doesn't do all of this right now :)
+this is a major wip. it works end to end but leaves a lot to be desired :)
