@@ -3,8 +3,16 @@ import logging
 import subprocess
 from logbook import Logger
 import soundcloud
+<<<<<<< HEAD
 import sys
 import os
+=======
+
+
+#config.ECHO_NEST_API_KEY=""
+
+import sys, os
+>>>>>>> 7b406e8db401fe6bee67696917e61b76e678ef1d
 import echonest.remix.audio as audio
 from pprint import pprint
 from pyechonest import config
