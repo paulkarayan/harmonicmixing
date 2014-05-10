@@ -11,6 +11,7 @@ Created by Tristan Jehan and Jason Sundram.
 
 import os
 import sys
+import time
 from optparse import OptionParser
 
 from echonest.remix.action import render, make_stereo
@@ -104,7 +105,8 @@ def main():
     
         print "Rendering..."
     # Send to renderer
-    render(actions, 'capsule.mp3', verbose)
+    dts = str(time.time())
+    render(actions, 'hmix_%s.mp3' % dts, verbose)
     return 1
     
 if __name__ == "__main__":

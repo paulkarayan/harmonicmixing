@@ -3,49 +3,26 @@ import logging
 import subprocess
 from logbook import Logger
 import soundcloud
-
-config.ECHO_NEST_API_KEY="KNMOC2RMZUAFTSGFO"
-
-#config.ECHO_NEST_API_KEY=""
-
-import sys, os
+import sys
+import os
 import echonest.remix.audio as audio
 from pprint import pprint
 from pyechonest import config
 import unittest
 import random
 
-##usage = """
-##Usage:
-##python keymix.py <inputDirectory> <outputFilename>
-##
-##Example:
-##python keymix.py /path/to/mp3s djideas.txt
-##"""
+capdir = os.getcwd()
+directory = os.path.join(capdir, "songs")
+
+echonestkey = os.environ.get('ECHO_NEST_API_KEY')
+config.ECHO_NEST_API_KEY=echonestkey
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 log = Logger('Logbook')
-
-
-# PC directory ... just uncomment to test
-directory = "C:\Users\paulkarayan\Documents\GitHub\harmonicmixing\songs"
-capdir = "C:\Users\paulkarayan\Documents\GitHub\harmonicmixing"
-
-#Linux directory -for songs
-#directory = "/home/paulkarayan/harmonicmixing/songs/"
-
-#linux directory for the capsule script
-#capdir = "/home/paulkarayan/harmonicmixing/"
-
-shimsongdict_mock = {"Arcade":111,"mock orange":121, "angrytime":120, "darkpup":121,
-                   "oddoneout":60}
-
 
 allsongdict = {}
 shimsongdict = {}
-
 
 harmonic_mixing_dict = {11:[121,11,21,10],
 21:[11,21,31,20],
@@ -71,8 +48,6 @@ harmonic_mixing_dict = {11:[121,11,21,10],
 100:[90,100,110,101],
 110:[100,110,120,111],
 120:[110,120,10,121]}
-
-
 
 def pickasong(songname=None):
     log.info('picking a song from shimsongdict')
@@ -108,8 +83,6 @@ def findsongmatches(current_song_matches):
         log.info("no more songs that match, you're done.")
         return "killswitch"
 
-    #print("enumerate output list:", *outputlist, sep=',')
-    #stupid old python versions wont work w ^^
     log.info("enumerate output list:")
     for x in outputlist:
         log.info(x)
@@ -132,8 +105,8 @@ def tempo(audiofile):
     return int(audiofile.analysis.tempo['value'])
 
 
-def gatherfiles(directory):
 #returns a dict mocked by shimsongdict_mock
+def gatherfiles(directory):
 
     ff = os.listdir(directory)
     for f in ff:
@@ -154,27 +127,19 @@ def gatherfiles(directory):
     f = open("outfile.txt", 'w')
     f.close()
     log.debug("shimsongdict: {0},{1}", shimsongdict, type(shimsongdict))
-    log.debug("shimsongdict_mock: {0},{1}", shimsongdict_mock, type(shimsongdict_mock))
     return shimsongdict
 
 def harmonicmix(songname=None):
-#call gatherfiles, i fake it using allsongdict
-# by commenting out below and setting shimsongdict = shimsongdict_mock
-
-#seed it or ask for a random song. againt, i fake it.
-##    seed = "Arcade"
-##    print(seed)
-##    songname = seed
 
 #note that you need to change this for Linux...
-    outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 20 -e ")
+    outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 60 -e ")
     shimsongdict = gatherfiles(directory)
     #shimsongdict = shimsongdict_mock
 
 
     while 1:
 
-#pass in songname if you want to seed it
+#pass in songname if you want to seed it, otherwise it's a rand
         outputstring += ' "' + songname + '"'
         print(outputstring)
         current_song_keysig = pickasong(songname)
@@ -196,33 +161,6 @@ def harmonicmix(songname=None):
 
     return outputstring
 
-#basic tests
 
-#test that we get variety
-##for x in range(0,2):
-##    print(x, "\n")
-##    harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
-##
-
-#auth for soundcloud...
-
-# create a client object with access token
-##client = soundcloud.Client(access_token='')
-
+#simple test - seed the ix w/ Dre Day
 harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
-
-### upload audio file
-##track = client.post('/tracks', track={
-##    'title': 'Harmonic Mixify - a mix for you',
-##    'asset_data': open('capsule.mp3', 'rb')
-##})
-##
-### print track link
-##print(track.permalink_url)
-
-#tests
-##harmonicmix integration test
-##harmonicmix test that we get variety, and it's not including wrong songs
-##pickasong
-##findkeymatches
-##findsongmatches
