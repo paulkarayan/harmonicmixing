@@ -11,6 +11,7 @@ from pprint import pprint
 from pyechonest import config
 import unittest
 import random
+import csv
 
 capdir = os.getcwd()
 directory = os.path.join(capdir, "songs")
@@ -21,9 +22,6 @@ config.ECHO_NEST_API_KEY=echonestkey
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 log = Logger('Logbook')
-
-allsongdict = {}
-shimsongdict = {}
 
 harmonic_mixing_dict = {11:[121,11,21,10],
 21:[11,21,31,20],
@@ -50,7 +48,7 @@ harmonic_mixing_dict = {11:[121,11,21,10],
 110:[100,110,120,111],
 120:[110,120,10,121]}
 
-def pickasong(songname=None):
+def pickasong(shimsongdict, songname=None):
     log.info('picking a song from shimsongdict')
     if songname == None:
         key = random.choice(shimsongdict.keys())
@@ -65,17 +63,19 @@ def pickasong(songname=None):
     return pickedsong
 
 
-def findkeymatches(current_song_keysig):
+def findkeymatches(harmonic_mixing_dict, current_song_keysig):
     log.info("the current song's keysig, {0}, matched with these keysigs: {1} ",
              current_song_keysig, harmonic_mixing_dict[current_song_keysig])
     return harmonic_mixing_dict[current_song_keysig]
 
 
 
-def findsongmatches(current_song_matches):
+def findsongmatches(shimsongdict, current_song_matches):
     outputlist = []
+    
     for keysig in current_song_matches:
         for name, value in shimsongdict.items():
+        
             if keysig == value:
                 log.info("the song that got matched with: {0}{1} ", name,value)
                 outputlist.append(name)
@@ -108,25 +108,34 @@ def tempo(audiofile):
 
 #returns a dict mocked by shimsongdict_mock
 def gatherfiles(directory):
+    allsongdict = {}
+    shimsongdict = {}
 
-    ff = os.listdir(directory)
-    for f in ff:
-        if f.rsplit('.', 1)[1].lower() in ['mp3', 'aif', 'aiff', 'aifc', 'wav']:
-            filename = os.path.join(directory, f)
+#get persisted songs and their metadata
+    with open('test_songstore.csv', 'rb') as f:
+      reader = csv.reader(f,)
+      shimsongdict = dict((rows[0],int(rows[1])) for rows in reader)
 
-            filekey = audio.LocalAudioFile(filename, defer=True)
+    with open('test_songstore.csv', 'a+b') as f:  # Just use 'w' mode in 3.x
+      w = csv.writer(f)
 
-            allsongdict[filename] = [keysig(filekey), mode(filekey),timesig(filekey), tempo(filekey)]
+      ff = os.listdir(directory)
+      for f in ff:
+          if f.rsplit('.', 1)[1].lower() in ['mp3', 'aif', 'aiff', 'aifc', 'wav']:
+                filename = os.path.join(directory, f)
+
+                if filename in shimsongdict.keys():
+                    log.info("the song that we didn't call api for: {0} ", filename)
+ 
+                else:
+                    filekey = audio.LocalAudioFile(filename, defer=True)
+                    allsongdict[filename] = [keysig(filekey), mode(filekey),timesig(filekey), tempo(filekey)]
 
 #sort of a shim thing to produce the format expected
-            shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
-            log.info("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
+                    shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
+                    log.info("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
+                    w.writerow([filename, int(str(keysig(filekey)) + str(mode(filekey)))])
 
-
-    print >> sys.stderr, 'making recommendations.'
-
-    f = open("outfile.txt", 'w')
-    f.close()
     log.debug("shimsongdict: {0},{1}", shimsongdict, type(shimsongdict))
     return shimsongdict
 
@@ -135,31 +144,24 @@ def harmonicmix(songname=None):
 #note that you need to change this for Linux...
     outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 60 -e ")
     shimsongdict = gatherfiles(directory)
-    #shimsongdict = shimsongdict_mock
-
 
     while 1:
 
 #pass in songname if you want to seed it, otherwise it's a rand
         outputstring += ' "' + songname + '"'
-        print(outputstring)
-        current_song_keysig = pickasong(songname)
-        #print(current_song_keysig, "current_song_keysig")
-        current_song_matches = findkeymatches(current_song_keysig)
-        #print(current_song_matches, "current_song_matches")
-        songname = findsongmatches(current_song_matches)
+        current_song_keysig = pickasong(shimsongdict, songname)
+        current_song_matches = findkeymatches(harmonic_mixing_dict, current_song_keysig)
+        songname = findsongmatches(shimsongdict, current_song_matches)
 
         if songname == "killswitch":
             break
 
-        print(songname, "<-- is the next song you'll hear")
         outputstring += ' "' + songname + '"'
-        print(outputstring)
 
+    log.info("calling subprocess to create combined mix")
     process = subprocess.Popen(outputstring, stdout=subprocess.PIPE, shell=True)
     stdoutdata, stderrdata = process.communicate()
-    print(process.returncode, "return code")
-
+    
     return outputstring
 
 
