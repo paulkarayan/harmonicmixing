@@ -144,26 +144,38 @@ def harmonicmix(songname=None):
 #note that you need to change this for Linux...
     outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 60 -e ")
     shimsongdict = gatherfiles(directory)
-
+    songnamelist = []
     while 1:
-
+        
+        songnamelist.append(songname)
 #pass in songname if you want to seed it, otherwise it's a rand
         outputstring += ' "' + songname + '"'
         current_song_keysig = pickasong(shimsongdict, songname)
         current_song_matches = findkeymatches(harmonic_mixing_dict, current_song_keysig)
         songname = findsongmatches(shimsongdict, current_song_matches)
 
+        
+        
         if songname == "killswitch":
             break
 
         outputstring += ' "' + songname + '"'
 
+    return outputstring, songnamelist
+
+def mixmaster(iterations=100):
+    counter = 0 
+    while counter < iterations:
+        
+        pass
+
+def mixgen(outputstring):
     log.info("calling subprocess to create combined mix")
     process = subprocess.Popen(outputstring, stdout=subprocess.PIPE, shell=True)
     stdoutdata, stderrdata = process.communicate()
-    
-    return outputstring
 
+    
 
 #simple test - seed the ix w/ Dre Day
-harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
+outputstring, songnamelist = harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
+print(outputstring, songnamelist)

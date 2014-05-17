@@ -35,6 +35,7 @@ def do_work(audio_files, options):
     equal = bool(options.equalize)
     verbose = bool(options.verbose)
     
+    
     # Get pyechonest/remix objects
     analyze = lambda x : LocalAudioFile(x, verbose=verbose, sampleRate = 44100, numChannels = 2)
     tracks = map(analyze, audio_files)
@@ -88,6 +89,7 @@ def get_options(warn=False):
     parser.add_option("-e", "--equalize", action="store_true", help="automatically adjust volumes")
     parser.add_option("-v", "--verbose", action="store_true", help="show results on screen")        
     parser.add_option("-p", "--pdb", default=True, help="dummy; here for not crashing when using nose")
+    parser.add_option("-s", "--stop", action="store_true", help="use special stop name")
     
     (options, args) = parser.parse_args()
     if warn and len(args) < 2: 
@@ -98,6 +100,8 @@ def main():
     options, args = get_options(warn=True);
     actions = do_work(args, options)
     verbose = bool(options.verbose)
+    stop = bool(options.stop)
+    
     
     if verbose:
         display_actions(actions)
@@ -106,7 +110,11 @@ def main():
         print "Rendering..."
     # Send to renderer
     dts = str(time.time())
-    render(actions, 'hmix_%s.mp3' % dts, verbose)
+    if stop:
+        render(actions, 'captemp.mp3', verbose)
+    else:
+        render(actions, 'hmix_%s.mp3' % dts, verbose)
+        
     return 1
     
 if __name__ == "__main__":
