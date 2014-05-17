@@ -111,9 +111,9 @@ def main():
     # Send to renderer
     dts = str(time.time())
     if stop:
-        render(actions, 'captemp.mp3', verbose)
+        render(actions, 'hmix_%s.mp3' % dts, verbose)    
     else:
-        render(actions, 'hmix_%s.mp3' % dts, verbose)
+        render(actions, 'captemp.mp3', verbose)
         
     return 1
     

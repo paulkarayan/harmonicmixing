@@ -12,6 +12,7 @@ from pyechonest import config
 import unittest
 import random
 import csv
+import itertools
 
 capdir = os.getcwd()
 directory = os.path.join(capdir, "songs")
@@ -22,6 +23,8 @@ config.ECHO_NEST_API_KEY=echonestkey
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 log = Logger('Logbook')
+
+
 
 harmonic_mixing_dict = {11:[121,11,21,10],
 21:[11,21,31,20],
@@ -50,6 +53,7 @@ harmonic_mixing_dict = {11:[121,11,21,10],
 
 def pickasong(shimsongdict, songname=None):
     log.info('picking a song from shimsongdict')
+    #print(shimsongdict)
     if songname == None:
         key = random.choice(shimsongdict.keys())
         log.debug("key type: {0}", type(key))
@@ -139,11 +143,10 @@ def gatherfiles(directory):
     log.debug("shimsongdict: {0},{1}", shimsongdict, type(shimsongdict))
     return shimsongdict
 
-def harmonicmix(songname=None):
+def harmonicmix(shimsongdict, songname=None):
 
 #note that you need to change this for Linux...
-    outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 60 -e ")
-    shimsongdict = gatherfiles(directory)
+    outputstring = ("python " + capdir+ "\capsule\capsule.py -t 4 -i 30 -e -s ")
     songnamelist = []
     while 1:
         
@@ -163,19 +166,52 @@ def harmonicmix(songname=None):
 
     return outputstring, songnamelist
 
-def mixmaster(iterations=100):
-    counter = 0 
-    while counter < iterations:
-        
-        pass
+def mixmaster(iterations=5):
+    topgoodness = 0
+    topos = ""
+    goodnessdict = {}
+    shimsongdict = gatherfiles(directory)
+    rlist = list(shimsongdict.keys())
+   
+    for lt in (itertools.repeat(rlist)):
+        shimsongdict = gatherfiles(directory)
+        song = random.choice(lt)
+        #print(song)
+        outputstring, songnamelist = harmonicmix(shimsongdict, song)
+        #print(outputstring, songnamelist)
+        shimsongdict = gatherfiles(directory)
+        goodness = goodnessgracious(outputstring, songnamelist)
+        goodnessdict[outputstring] = goodness
+        if len(goodnessdict) > iterations:
+            break
+        #print(goodnessdict, len(goodnessdict), "<-goodnessdict")
+
+    for os, mixgoodness in goodnessdict.items():
+        if mixgoodness > topgoodness:
+            topgoodness = mixgoodness
+            topos = os
+    log.info("the best goodness score was {0}, from song {1}, with all being {2}", topgoodness, topos, goodnessdict.items())
+    mixgen(topos)
 
 def mixgen(outputstring):
     log.info("calling subprocess to create combined mix")
     process = subprocess.Popen(outputstring, stdout=subprocess.PIPE, shell=True)
     stdoutdata, stderrdata = process.communicate()
 
+def goodnessgracious(outputstring,songnamelist=None): 
+#this is a measure of the mix's goodness. this could be
+#a weighting of style stdev, bpm, repeated artists, etc..
+#but for now it's just # of songs in the mix. and approx. by
+#outputstring length (which should be roughly correct) so also
+#ignoring the songnamelist for now but it'll be needed in future
+
+    goodness = len(outputstring)
+
+    return goodness 
+
     
+mixmaster()
 
 #simple test - seed the ix w/ Dre Day
-outputstring, songnamelist = harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
-print(outputstring, songnamelist)
+##outputstring, songnamelist = harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
+##print(outputstring, songnamelist)
