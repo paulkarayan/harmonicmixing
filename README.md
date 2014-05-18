@@ -15,4 +15,11 @@ Instructions:
 > python harmonicmix.py
 - commit to this project since it could be dope
 
-this is a major wip. it works end to end but leaves a lot to be desired :)
+this is a work in progress, but it works end-to-end pretty well. 
+
+i would love another set of eyes on the core harmonic mixing implementation, as well as help with the beat matching and "goodness" function.
+
+common issues:
+
+- capsule.py is a bit flakey esp. with large numbers of songs, and my implementation doesn't provide much insight into how the process is progressing (or even if it's worked or not). i've restricted the upper limit of songs you can mix for now which helps with both problems.
+- capsule.py and echonest in general needs ffmpeg, which sucks to get working on linux. thoughts here would be very useful!
