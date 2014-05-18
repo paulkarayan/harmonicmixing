@@ -1,11 +1,11 @@
 from pyechonest import config
 import logging
 import subprocess
-from logbook import Logger
+from logbook import Logger, FileHandler, SyslogHandler, NullHandler
 import soundcloud
 import sys
 import os
-import sys, os
+import sys
 import echonest.remix.audio as audio
 from pprint import pprint
 from pyechonest import config
@@ -13,6 +13,7 @@ import unittest
 import random
 import csv
 import itertools
+from collections import defaultdict
 
 capdir = os.getcwd()
 directory = os.path.join(capdir, "songs")
@@ -23,37 +24,42 @@ config.ECHO_NEST_API_KEY=echonestkey
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 log = Logger('Logbook')
+file_handler = FileHandler("keymixlog.log")
+#error_handler = SyslogHandler('logbook example', level='ERROR')
 
+#this seems to work though :)
+null_handler = NullHandler()
 
+harmonic_mixing_dict = {80:[10,80,30,101],
+30:[80,30,110,61],
+110:[30,110,50,11],
+50:[110,50,0,81],
+0:[50,0,70,31],
+70:[0,70,20,91],
+20:[70,20,90,51],
+90:[20,90,40,1],
+40:[90,40,100,71],
+100:[40,100,60,21],
+60:[100,60,10,111],
+10:[60,10,80,41],
 
-harmonic_mixing_dict = {11:[121,11,21,10],
-21:[11,21,31,20],
-31:[21,31,41,30],
-41:[31,41,51,40],
-51:[41,51,61,50],
-61:[51,61,71,60],
-71:[61,71,81,70],
-81:[71,81,91,80],
-91:[81,91,101,90],
-101:[91,101,111,100],
-111:[101,111,121,110],
-121:[111,121,11,120],
-10:[120,10,20,11],
-20:[10,20,30,21],
-30:[20,30,40,31],
-40:[30,40,50,41],
-50:[40,50,60,51],
-60:[50,60,70,61],
-70:[60,70,80,71],
-80:[70,80,90,81],
-90:[80,90,100,91],
-100:[90,100,110,101],
-110:[100,110,120,111],
-120:[110,120,10,121]}
+101:[41,101,61,80],
+61:[101,61,11,30],
+11:[61,11,81,110],
+81:[11,81,31,50],
+31:[81,31,91,0],
+91:[31,91,51,70],
+51:[91,51,1,20],
+1:[51,1,71,90],
+71:[1,71,21,40],
+21:[71,21,111,100],
+111:[21,111,41,60],
+41:[111,41,101,10]
+}
 
 def pickasong(shimsongdict, songname=None):
-    log.info('picking a song from shimsongdict')
-    #print(shimsongdict)
+    log.debug('picking a song from shimsongdict')
+
     if songname == None:
         key = random.choice(shimsongdict.keys())
         log.debug("key type: {0}", type(key))
@@ -68,7 +74,7 @@ def pickasong(shimsongdict, songname=None):
 
 
 def findkeymatches(harmonic_mixing_dict, current_song_keysig):
-    log.info("the current song's keysig, {0}, matched with these keysigs: {1} ",
+    log.debug("the current song's keysig, {0}, matched with these keysigs: {1} ",
              current_song_keysig, harmonic_mixing_dict[current_song_keysig])
     return harmonic_mixing_dict[current_song_keysig]
 
@@ -81,16 +87,12 @@ def findsongmatches(shimsongdict, current_song_matches):
         for name, value in shimsongdict.items():
         
             if keysig == value:
-                log.info("the song that got matched with: {0}{1} ", name,value)
+                log.debug("the song that got matched with: {0}{1} ", name,value)
                 outputlist.append(name)
 
     if outputlist.__len__() == 0:
         log.info("no more songs that match, you're done.")
         return "killswitch"
-
-    log.info("enumerate output list:")
-    for x in outputlist:
-        log.info(x)
 
     songname = random.choice(outputlist)
 
@@ -129,16 +131,20 @@ def gatherfiles(directory):
                 filename = os.path.join(directory, f)
 
                 if filename in shimsongdict.keys():
-                    log.info("the song that we didn't call api for: {0} ", filename)
- 
+                    log.debug("the song that we didn't call api for: {0} ", filename)
+        
                 else:
                     filekey = audio.LocalAudioFile(filename, defer=True)
                     allsongdict[filename] = [keysig(filekey), mode(filekey),timesig(filekey), tempo(filekey)]
 
+                    log.debug(str(keysig(filekey)) + str(mode(filekey)),len(str(keysig(filekey)) + str(mode(filekey))),"<--len of keysig")
+                    if len(str(keysig(filekey)) + str(mode(filekey))) < 2:
+                        log.debug("skipped a keysig of {0}", keysig)
+                    else:
 #sort of a shim thing to produce the format expected
-                    shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
-                    log.info("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
-                    w.writerow([filename, int(str(keysig(filekey)) + str(mode(filekey)))])
+                        shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
+                        log.debug("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
+                        w.writerow([filename, int(str(keysig(filekey)) + str(mode(filekey)))])
 
     log.debug("shimsongdict: {0},{1}", shimsongdict, type(shimsongdict))
     return shimsongdict
@@ -150,9 +156,8 @@ def harmonicmix(shimsongdict, songname=None):
     songnamelist = []
     while 1:
         
-        songnamelist.append(songname)
-#pass in songname if you want to seed it, otherwise it's a rand
-        outputstring += ' "' + songname + '"'
+
+        
         current_song_keysig = pickasong(shimsongdict, songname)
         current_song_matches = findkeymatches(harmonic_mixing_dict, current_song_keysig)
         songname = findsongmatches(shimsongdict, current_song_matches)
@@ -162,39 +167,56 @@ def harmonicmix(shimsongdict, songname=None):
         if songname == "killswitch":
             break
 
+#capsule.py seems to fail with too many songs, so for the time being, restrict to 10
+
+        if len(songnamelist) > 10:
+            break
+        
+        songnamelist.append(songname)
         outputstring += ' "' + songname + '"'
 
     return outputstring, songnamelist
 
 def mixmaster(iterations=5):
+    
     topgoodness = 0
     topos = ""
-    goodnessdict = {}
+    goodnessdict = extenddict()
+    counter = 0 
+    
+    
     shimsongdict = gatherfiles(directory)
     rlist = list(shimsongdict.keys())
    
     for lt in (itertools.repeat(rlist)):
         shimsongdict = gatherfiles(directory)
         song = random.choice(lt)
-        #print(song)
+        
         outputstring, songnamelist = harmonicmix(shimsongdict, song)
-        #print(outputstring, songnamelist)
+ 
         shimsongdict = gatherfiles(directory)
         goodness = goodnessgracious(outputstring, songnamelist)
+        counter += 1
         goodnessdict[outputstring] = goodness
-        if len(goodnessdict) > iterations:
+        if counter > iterations:
             break
-        #print(goodnessdict, len(goodnessdict), "<-goodnessdict")
+        
 
-    for os, mixgoodness in goodnessdict.items():
-        if mixgoodness > topgoodness:
-            topgoodness = mixgoodness
-            topos = os
-    log.info("the best goodness score was {0}, from song {1}, with all being {2}", topgoodness, topos, goodnessdict.items())
+    for ose, mixgoodness in goodnessdict.items():
+    #    print(ose, mixgoodness, type(ose), type(mixgoodness),"<-----")
+        for m in mixgoodness:
+            if m > topgoodness:
+                topgoodness = m
+                topos = ose
+
+    
+    log.info("the best goodness score was {0}, from song {1}", topgoodness, topos)
+
     mixgen(topos)
-
+    
 def mixgen(outputstring):
     log.info("calling subprocess to create combined mix")
+    print("calling subprocess to create combined mix")
     process = subprocess.Popen(outputstring, stdout=subprocess.PIPE, shell=True)
     stdoutdata, stderrdata = process.communicate()
 
@@ -209,9 +231,14 @@ def goodnessgracious(outputstring,songnamelist=None):
 
     return goodness 
 
-    
-mixmaster()
 
-#simple test - seed the ix w/ Dre Day
-##outputstring, songnamelist = harmonicmix(directory + '\Dr. Dre - Dre Day.mp3')
-##print(outputstring, songnamelist)
+class extenddict(dict):
+
+    def __setitem__(self, key, value):
+        """add the given value to the list of values for this key"""
+        self.setdefault(key, []).append(value)
+
+
+with file_handler.threadbound():
+    mixmaster()
+
