@@ -14,6 +14,7 @@ import random
 import csv
 import itertools
 from collections import defaultdict
+import glob
 
 capdir = os.getcwd()
 directory = os.path.join(capdir, "songs")
@@ -213,6 +214,14 @@ def mixmaster(iterations=5):
     log.info("the best goodness score was {0}, from song {1}", topgoodness, topos)
 
     mixgen(topos)
+
+    #assume that newest mp3 file is the one we just made
+
+    newest = max(glob.iglob('*.[Mm][Pp]3'), key=os.path.getctime)
+
+    return newest
+
+
     
 def mixgen(outputstring):
     log.info("calling subprocess to create combined mix")
@@ -232,6 +241,34 @@ def goodnessgracious(outputstring,songnamelist=None):
     return goodness 
 
 
+def soundcloudupload(mixfilename='captemp.mp3'):
+    client_id = os.environ.get('SOUNDCLOUD_CLIENT_ID')
+    client_secret = os.environ.get('SOUNDCLOUD_CLIENT_SECRET')
+    username = raw_input('Enter your SoundCloud username: ')
+    password = raw_input('Enter your SoundCloud password: ')
+
+
+
+    client = soundcloud.Client(
+        client_id=client_id,
+        client_secret=client_secret,
+        username=username,
+        password=password
+    )
+    
+    print("logged in successfully as: %", % client.get('/me').username)
+
+    track = client.post('/tracks', track={
+    'title': 'Harmonic Mix %s' % mixfilename,
+    'sharing': 'private',
+    'description': 'Someone should add the song names in the mix here',
+    'asset_data': open(mixfilename, 'rb')
+})
+
+    print("uploaded your mix as: %s", track.title)
+
+
+
 class extenddict(dict):
 
     def __setitem__(self, key, value):
@@ -239,6 +276,11 @@ class extenddict(dict):
         self.setdefault(key, []).append(value)
 
 
+ 
+
+
 with file_handler.threadbound():
-    mixmaster()
+    newest = mixmaster()
+    soundcloudupload(newest)
+    
 
