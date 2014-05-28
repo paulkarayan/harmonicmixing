@@ -15,6 +15,8 @@ import csv
 import itertools
 from collections import defaultdict
 import glob
+import math
+
 
 capdir = os.getcwd()
 directory = os.path.join(capdir, "songs")
@@ -117,11 +119,18 @@ def tempo(audiofile):
 def gatherfiles(directory):
     allsongdict = {}
     shimsongdict = {}
+    shimbpmdict = {}
 
 #get persisted songs and their metadata
     with open('test_songstore.csv', 'rb') as f:
       reader = csv.reader(f,)
+      
       shimsongdict = dict((rows[0],int(rows[1])) for rows in reader)
+      
+    with open('test_songstore.csv', 'rb') as f:
+      reader = csv.reader(f,)
+      shimbpmdict = dict((rows[0],int(rows[2])) for rows in reader)
+      
 
     with open('test_songstore.csv', 'a+b') as f:  # Just use 'w' mode in 3.x
       w = csv.writer(f)
@@ -136,6 +145,7 @@ def gatherfiles(directory):
         
                 else:
                     filekey = audio.LocalAudioFile(filename, defer=True)
+
                     allsongdict[filename] = [keysig(filekey), mode(filekey),timesig(filekey), tempo(filekey)]
 
                     log.debug(str(keysig(filekey)) + str(mode(filekey)),len(str(keysig(filekey)) + str(mode(filekey))),"<--len of keysig")
@@ -144,11 +154,12 @@ def gatherfiles(directory):
                     else:
 #sort of a shim thing to produce the format expected
                         shimsongdict[filename] = int(str(keysig(filekey)) + str(mode(filekey)))
-                        log.debug("the song that just was analyzed had a keysig of: {0} ", int(str(keysig(filekey)) + str(mode(filekey))))
-                        w.writerow([filename, int(str(keysig(filekey)) + str(mode(filekey)))])
+                        shimbpmdict[filename] = int(tempo(filekey))
+                        log.debug("the song that just was analyzed had a keysig of: {0} and bpm of: {1} ", int(str(keysig(filekey)) + str(mode(filekey))), tempo(filekey))
+                        w.writerow([filename, int(str(keysig(filekey)) + str(mode(filekey))), tempo(filekey)])
 
-    log.debug("shimsongdict: {0},{1}", shimsongdict, type(shimsongdict))
-    return shimsongdict
+    log.debug("shimsongdict: {0},{1} shimbpmdict: {2}", shimsongdict, type(shimsongdict), shimbpmdict)
+    return shimsongdict, shimbpmdict
 
 def harmonicmix(shimsongdict, songname=None):
 
@@ -178,7 +189,7 @@ def harmonicmix(shimsongdict, songname=None):
 
     return outputstring, songnamelist
 
-def mixmaster(iterations=5):
+def mixmaster(bpm=None, iterations=5):
     
     topgoodness = 0
     topos = ""
@@ -186,17 +197,32 @@ def mixmaster(iterations=5):
     counter = 0 
     
     
-    shimsongdict = gatherfiles(directory)
+    shimsongdict, shimbpmdict = gatherfiles(directory)
+
+    if bpm != None:
+        shimsongdict = bpmclean(bpm, shimsongdict, shimbpmdict)
+    else:
+        print("no bpm cleaning enabled")
+    
     rlist = list(shimsongdict.keys())
-   
+    
     for lt in (itertools.repeat(rlist)):
-        shimsongdict = gatherfiles(directory)
+        shimsongdict,shimbpmdict = gatherfiles(directory)
         song = random.choice(lt)
+
+
+        if bpm != None:
+            shimsongdict = bpmclean(bpm, shimsongdict, shimbpmdict)
+        else:
+            print("no bpm cleaning enabled")
+        
+
         
         outputstring, songnamelist = harmonicmix(shimsongdict, song)
  
-        shimsongdict = gatherfiles(directory)
-        goodness = goodnessgracious(outputstring, songnamelist)
+#        shimsongdict, shimbpmdict = gatherfiles(directory)
+
+        goodness = goodnessgracious(outputstring, songnamelist, shimbpmdict)
         counter += 1
         goodnessdict[outputstring] = goodness
         if counter > iterations:
@@ -211,7 +237,7 @@ def mixmaster(iterations=5):
                 topos = ose
 
     
-    log.info("the best goodness score was {0}, from song {1}", topgoodness, topos)
+    log.info("the best goodness score was {0}, from mix {1}", topgoodness, topos)
 
     mixgen(topos)
 
@@ -221,7 +247,16 @@ def mixmaster(iterations=5):
 
     return newest
 
-
+def bpmclean(bpm, shimsongdict, shimbpmdict):
+    for key in shimsongdict.keys():
+        songbpm = shimbpmdict.get(key)
+        if songbpm > (bpm + 5) or songbpm < (bpm - 5):
+            log.debug("popped song for %d bpm when given %d" % (songbpm, bpm))
+            shimsongdict.pop(key)
+        else:
+            log.debug("**************didnt pop", key)
+    
+    return shimsongdict
     
 def mixgen(outputstring):
     log.info("calling subprocess to create combined mix")
@@ -229,15 +264,30 @@ def mixgen(outputstring):
     process = subprocess.Popen(outputstring, stdout=subprocess.PIPE, shell=True)
     stdoutdata, stderrdata = process.communicate()
 
-def goodnessgracious(outputstring,songnamelist=None): 
+def goodnessgracious(outputstring, songnamelist, shimbpmdict): 
 #this is a measure of the mix's goodness. this could be
 #a weighting of style stdev, bpm, repeated artists, etc..
-#but for now it's just # of songs in the mix. and approx. by
-#outputstring length (which should be roughly correct) so also
-#ignoring the songnamelist for now but it'll be needed in future
 
-    goodness = len(outputstring)
+    bpmlist = []
+    
+    for song in songnamelist:
+        bpm = shimbpmdict.get(song)
+        log.debug("goodness internals {0} {1} {2}", song, bpm, bpmlist)
+        bpmlist.append(bpm)
 
+    try:
+        mean = sum(bpmlist, 0.0) / len(bpmlist)
+        d = [ (i - mean) ** 2 for i in bpmlist]
+        std_dev = math.sqrt(sum(d) / len(d))
+
+#there is probably a better way to find the lowest deviation
+#and select it as "good"
+        
+        goodness = (1 / (std_dev+1) )
+    except:
+        goodness = 0
+    
+    log.info("goodness for {0} calculated: {1}", outputstring, goodness)
     return goodness 
 
 
@@ -256,7 +306,7 @@ def soundcloudupload(mixfilename='captemp.mp3'):
         password=password
     )
     
-    print("logged in successfully as: %", % client.get('/me').username)
+    print("logged in successfully as: %" % client.get('/me').username)
 
     track = client.post('/tracks', track={
     'title': 'Harmonic Mix %s' % mixfilename,
@@ -276,11 +326,10 @@ class extenddict(dict):
         self.setdefault(key, []).append(value)
 
 
- 
 
 
 with file_handler.threadbound():
-    newest = mixmaster()
-    soundcloudupload(newest)
+    newest = mixmaster(120)
+    #soundcloudupload(newest)
     
 
