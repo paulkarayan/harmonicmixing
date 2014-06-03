@@ -5,6 +5,8 @@ uses the concept of "harmonic mixing" (google it!) to create a delightful mix fr
 
 to do so, the program discerns the keys (and bpm) of audio files in a directory using the echnoest API, and then links songs that will sound good together.
 
+I use it to generate ideas for DJ mixes and mashup ideas. What will you use it for?
+
 Instructions:
 - clone this repo
 - install the Echo Nest API key per the directions on Remix
